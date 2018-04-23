@@ -37,7 +37,17 @@ def getFilect(file,shnum):
         rdata=table.row_values(row)
         datavalue.append(tuple(rdata))
     return datavalue
-
+    
+    
+def get_sheet_data(fh, shnum):
+    table = fh.sheets()[shnum]
+    num=table.nrows
+    datavalue = []
+    for row in range(num):
+        rdata=table.row_values(row)
+        datavalue.append(tuple(rdata))
+    return datavalue
+    
 #获取sheet表的个数
 def getshnum(fh):
     x=0
@@ -60,33 +70,37 @@ if __name__=='__main__':
     # 用字典存储每个对应sheet的内容，同时获取sheet名字
     for fl in allxls:
         fh=open_xls(fl)
-        x=getshnum(fh)
+        # x=getshnum(fh)
         file_sheet_names = fh.sheet_names()
-        sheet_names_lst.append(file_sheet_names)
-        for shnum in range(x):
+        #sheet_names_lst.append(file_sheet_names)
+        
+        for shnum, sheet_name in enumerate(file_sheet_names, 0):
             print("正在读取文件："+str(fl)+"的第"+str(shnum)+"个sheet表的内容...")
-            sheet_value = getFilect(fl,shnum)
-            datavalue[shnum] += sheet_value
+            # sheet_value = getFilect(fl,shnum)
+            sheet_value = get_sheet_data(fh, shnum)
+            datavalue[sheet_name] += sheet_value
             # rvalue=getFilect(fl,shnum)
     #定义最终合并后生成的新文件
-    sheet_names = sorted(sheet_names_lst, key=lambda x: len(x), reverse=True)[0] # 得到最终的sheet名字
+    #sheet_names = sorted(sheet_names_lst, key=lambda x: len(x), reverse=True)[0] # 得到最终的sheet名字
+    #print(sheet_names)
     
-    print(sheet_names)
     result_path = os.path.join(os.getcwd(), "result")
     merge_file = "merge_file.xlsx"
     # endfile='F:/test/excel3.xlsx'
     
     #创建一个sheet工作对象
     wb=xlsxwriter.Workbook(merge_file)
-    ws_handles = [wb.add_worksheet(sheet_names[shnum]) for shnum in range(x)]
+    # ws_handles = [wb.add_worksheet(sheet_names[shnum]) for shnum in range(x)]
+    ws_handles = {}
+    print('\n', datavalue.keys(), '\n', sep="")
     
-    
-    for shnum in range(x):
-        sheet_data = list(set(datavalue[shnum]))
+    for sheet_name in datavalue.keys():
+        sheet_data = list(set(datavalue[sheet_name]))
+        ws_handles[sheet_name] = wb.add_worksheet(sheet_name)
         for a in range(len(sheet_data)):
             for b in range(len(sheet_data[a])):
                 c=sheet_data[a][b]
-                ws_handles[shnum].write(a,b,c)
+                ws_handles[sheet_name].write(a,b,c)
                 
     wb.close()
             
