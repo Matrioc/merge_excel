@@ -5,6 +5,7 @@ import xlrd
 import xlsxwriter
 import os
 from collections import defaultdict
+# from collections import OrderedDict
 
     
 # 获取目录中所有的excel文件
@@ -56,6 +57,11 @@ def getshnum(fh):
         x+=1
     return x
     
+def undup_order(lsthash): # lsthash: 值可以hash的列表
+    tmp = list(set(lsthash))
+    result = sorted(tmp, key=lsthash.index)
+    return result
+    
     
 
 
@@ -95,7 +101,7 @@ if __name__=='__main__':
     print('\n', datavalue.keys(), '\n', sep="")
     
     for sheet_name in datavalue.keys():
-        sheet_data = list(set(datavalue[sheet_name]))
+        sheet_data = undup_order(datavalue[sheet_name])
         ws_handles[sheet_name] = wb.add_worksheet(sheet_name)
         for a in range(len(sheet_data)):
             for b in range(len(sheet_data[a])):
